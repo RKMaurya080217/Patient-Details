@@ -8,7 +8,7 @@ public class DataBaseConnection {
 	public static Connection getConnection() {
 		Connection conn = null;
 		try {
-			conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/mydocument", "root", "root");
+			conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/medicalreport", "root", "root");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
