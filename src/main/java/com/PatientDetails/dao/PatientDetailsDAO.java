@@ -32,20 +32,36 @@ public class PatientDetailsDAO {
 	int i = 1;
 	private String medicinrecord;
 	private String testrecord;
-	private int j=1;
+	private int j = 1;
 
 	public MedicalRecordDTO addPatient(MedicalRecordDTO medicalRecordDTO) {
+
+		addMedicine(medicalRecordDTO);
+
+		addTest(medicalRecordDTO);
+
+		addPatientDetails(medicalRecordDTO);
 		
-		//this adding a new comment
+		getMedicineId();
+		
+		getTestId();
+
+		return addAppointment(medicalRecordDTO);
+	}
+	
+
+	public void addMedicine(MedicalRecordDTO medicalRecordDTO) {
+
 		List<MedicinesDTO> medi = medicalRecordDTO.getAppointmentDTO().getPrescriptionDTO().getMedicines();
 		try {
 			pstmt = DataBaseConnection.getConnection().prepareStatement(addMedicineDetails);
 
 			for (MedicinesDTO m : medi) {
+				// select id from med where name =m.name and price=m.price
+				// if(rs.no result)
 				pstmt.setString(1, m.getName());
 				pstmt.setDouble(2, m.getPrice());
 				rowsAffected = pstmt.executeUpdate();
-
 			}
 
 		} catch (SQLException e) {
@@ -63,7 +79,9 @@ public class PatientDetailsDAO {
 		sbf.append(")");
 		medicineId = sbf.toString();
 		System.out.println("Queryy : = " + sbf);
+	}
 
+	public void addTest(MedicalRecordDTO medicalRecordDTO) {
 		try {
 			pstmt = DataBaseConnection.getConnection().prepareStatement(addTestDetails);
 			List<TestsDTO> test = medicalRecordDTO.getAppointmentDTO().getPrescriptionDTO().getTests();
@@ -93,6 +111,9 @@ public class PatientDetailsDAO {
 		testId = test.toString();
 		System.out.println("Test Queryy : = " + testId);
 
+	}
+
+	public void addPatientDetails(MedicalRecordDTO medicalRecordDTO) {
 		try {
 			pstmt = DataBaseConnection.getConnection().prepareStatement(addPatientDetails);
 			// medicalRecordDTO.getAppointmentDTO().getPrescriptionDTO().getMedicines()
@@ -106,48 +127,9 @@ public class PatientDetailsDAO {
 			e.printStackTrace();
 		}
 
-		try {
-			pstmt = DataBaseConnection.getConnection().prepareStatement(medicineId);
-			rs = pstmt.executeQuery();
+	}
 
-			while (rs.next()) {
-				id.add(rs.getInt("ID"));
-			}
-
-			StringJoiner sj = new StringJoiner(",");
-			for (Integer value : id) {
-				sj.add(value.toString());
-			}
-			medicinrecord = sj.toString();
-
-			System.out.println("Medicine id : " + id);
-			System.out.println("Medicine id in String : " + medicinrecord);
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-
-		try {
-			pstmt = DataBaseConnection.getConnection().prepareStatement(testId);
-			rs = pstmt.executeQuery();
-
-			while (rs.next()) {
-				testidlist.add(rs.getInt("ID"));
-			}
-
-			StringJoiner sj = new StringJoiner(",");
-			for (Integer value : testidlist) {
-				sj.add(value.toString());
-			}
-			testrecord = sj.toString();
-
-			System.out.println("Test id : " + testidlist);
-			System.out.println("Test id in String : " + testrecord);
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-
+	public MedicalRecordDTO addAppointment(MedicalRecordDTO medicalRecordDTO) {
 		try {
 			pstmt = DataBaseConnection.getConnection().prepareStatement(addAppointmentDetails);
 
@@ -174,4 +156,53 @@ public class PatientDetailsDAO {
 		}
 	}
 
+	public void getMedicineId()
+	{
+		try {
+			pstmt = DataBaseConnection.getConnection().prepareStatement(medicineId);
+			rs = pstmt.executeQuery();
+
+			while (rs.next()) {
+				id.add(rs.getInt("ID"));
+			}
+
+			StringJoiner sj = new StringJoiner(",");
+			for (Integer value : id) {
+				sj.add(value.toString());
+			}
+			medicinrecord = sj.toString();
+
+			System.out.println("Medicine id : " + id);
+			System.out.println("Medicine id in String : " + medicinrecord);
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+	}
+	
+	public void getTestId()
+	{
+		try {
+			pstmt = DataBaseConnection.getConnection().prepareStatement(testId);
+			rs = pstmt.executeQuery();
+
+			while (rs.next()) {
+				testidlist.add(rs.getInt("ID"));
+			}
+
+			StringJoiner sj = new StringJoiner(",");
+			for (Integer value : testidlist) {
+				sj.add(value.toString());
+			}
+			testrecord = sj.toString();
+
+			System.out.println("Test id : " + testidlist);
+			System.out.println("Test id in String : " + testrecord);
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+	}
 }
