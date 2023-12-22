@@ -35,7 +35,6 @@ public class PatientDetailsDAO {
 	private int j=1;
 
 	public MedicalRecordDTO addPatient(MedicalRecordDTO medicalRecordDTO) {
-//This is simple test commit
 		List<MedicinesDTO> medi = medicalRecordDTO.getAppointmentDTO().getPrescriptionDTO().getMedicines();
 		try {
 			pstmt = DataBaseConnection.getConnection().prepareStatement(addMedicineDetails);
