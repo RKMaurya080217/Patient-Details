@@ -35,6 +35,8 @@ public class PatientDetailsDAO {
 	private int j=1;
 
 	public MedicalRecordDTO addPatient(MedicalRecordDTO medicalRecordDTO) {
+		
+		//this adding a new comment
 		List<MedicinesDTO> medi = medicalRecordDTO.getAppointmentDTO().getPrescriptionDTO().getMedicines();
 		try {
 			pstmt = DataBaseConnection.getConnection().prepareStatement(addMedicineDetails);
