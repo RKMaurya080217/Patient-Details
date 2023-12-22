@@ -19,13 +19,13 @@ public class PatientDetailsDAO {
 	// (appointment_email) VALUES (?)";
 	private String addMedicineDetails = "INSERT INTO MEDICINES (NAME, PRICE) VALUES (?, ?)";
 	private String addTestDetails = "INSERT INTO TESTS (NAME, PRICE, RESULT) VALUES (?, ?, ?)";
-	StringBuffer sbf = new StringBuffer("SELECT ID FROM MEDICINES WHERE (NAME, PRICE) IN(");
+	private StringBuffer sbf = new StringBuffer("SELECT ID FROM MEDICINES WHERE (NAME, PRICE) IN(");
 	private String medicineId;
-	StringBuffer test = new StringBuffer("SELECT ID FROM TESTS WHERE (NAME, PRICE, RESULT) IN(");
+	private StringBuffer test = new StringBuffer("SELECT ID FROM TESTS WHERE (NAME, PRICE, RESULT) IN(");
 	private String testId;
 
 	private int rowsAffected = 0;
-	PreparedStatement pstmt;
+	PreparedStatement pstmt, pstm;
 	ResultSet rs;
 	private List<Integer> id = new ArrayList<Integer>();
 	private List<Integer> testidlist = new ArrayList<Integer>();
@@ -41,27 +41,34 @@ public class PatientDetailsDAO {
 		addTest(medicalRecordDTO);
 
 		addPatientDetails(medicalRecordDTO);
-		
+
 		getMedicineId();
-		
+
 		getTestId();
 
 		return addAppointment(medicalRecordDTO);
 	}
-	
 
 	public void addMedicine(MedicalRecordDTO medicalRecordDTO) {
 
+		pstmt = null;
+		pstm = null;
 		List<MedicinesDTO> medi = medicalRecordDTO.getAppointmentDTO().getPrescriptionDTO().getMedicines();
 		try {
 			pstmt = DataBaseConnection.getConnection().prepareStatement(addMedicineDetails);
 
 			for (MedicinesDTO m : medi) {
-				// select id from med where name =m.name and price=m.price
-				// if(rs.no result)
-				pstmt.setString(1, m.getName());
-				pstmt.setDouble(2, m.getPrice());
-				rowsAffected = pstmt.executeUpdate();
+				String checkmediquery = "select 1 from medicines where name = '" + m.getName() + "' and price = "
+						+ m.getPrice();
+				pstm = DataBaseConnection.getConnection().prepareStatement(checkmediquery);
+				ResultSet rs = pstm.executeQuery();
+				if (!rs.next()) {
+					pstmt.setString(1, m.getName());
+					pstmt.setDouble(2, m.getPrice());
+					rowsAffected = pstmt.executeUpdate();
+					System.out.println("//Inside if");
+				}
+
 			}
 
 		} catch (SQLException e) {
@@ -82,27 +89,32 @@ public class PatientDetailsDAO {
 	}
 
 	public void addTest(MedicalRecordDTO medicalRecordDTO) {
+		pstmt = null;
+		pstm = null;
+		List<TestsDTO> testdto = medicalRecordDTO.getAppointmentDTO().getPrescriptionDTO().getTests();
 		try {
 			pstmt = DataBaseConnection.getConnection().prepareStatement(addTestDetails);
-			List<TestsDTO> test = medicalRecordDTO.getAppointmentDTO().getPrescriptionDTO().getTests();
-
-			for (TestsDTO t : test) {
-				pstmt.setString(1, t.getName());
-				pstmt.setDouble(2, t.getPrice());
-				pstmt.setString(3, t.getResult());
-				rowsAffected = pstmt.executeUpdate();
-
+			for (TestsDTO t : testdto) {
+				String checktestquery = "select 1 from tests where name = '" + t.getName() + "' and price = "
+						+ t.getPrice() + " and RESULT = '" + t.getResult() + "'";
+				pstm = DataBaseConnection.getConnection().prepareStatement(checktestquery);
+				ResultSet rs = pstm.executeQuery();
+				if (!rs.next()) {
+					pstmt.setString(1, t.getName());
+					pstmt.setDouble(2, t.getPrice());
+					pstmt.setString(3, t.getResult());
+					rowsAffected = pstmt.executeUpdate();
+				}
 			}
 
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-
-		List<TestsDTO> testlist = medicalRecordDTO.getAppointmentDTO().getPrescriptionDTO().getTests();
-
-		for (TestsDTO t : testlist) {
+		// List<TestsDTO> testlist =
+		// medicalRecordDTO.getAppointmentDTO().getPrescriptionDTO().getTests();
+		for (TestsDTO t : testdto) {
 			test.append("('" + t.getName() + "', " + t.getPrice() + ", '" + t.getResult() + "')");
-			if (testlist.size() > j) {
+			if (testdto.size() > j) {
 				test.append(", ");
 				j++;
 			}
@@ -110,7 +122,6 @@ public class PatientDetailsDAO {
 		test.append(")");
 		testId = test.toString();
 		System.out.println("Test Queryy : = " + testId);
-
 	}
 
 	public void addPatientDetails(MedicalRecordDTO medicalRecordDTO) {
@@ -156,8 +167,7 @@ public class PatientDetailsDAO {
 		}
 	}
 
-	public void getMedicineId()
-	{
+	public void getMedicineId() {
 		try {
 			pstmt = DataBaseConnection.getConnection().prepareStatement(medicineId);
 			rs = pstmt.executeQuery();
@@ -180,9 +190,8 @@ public class PatientDetailsDAO {
 		}
 
 	}
-	
-	public void getTestId()
-	{
+
+	public void getTestId() {
 		try {
 			pstmt = DataBaseConnection.getConnection().prepareStatement(testId);
 			rs = pstmt.executeQuery();
@@ -203,6 +212,6 @@ public class PatientDetailsDAO {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
+
 	}
 }
